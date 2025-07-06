@@ -15,7 +15,6 @@ The pipeline leverages Pathway's ability to process data streams and maintain li
 *   **Pathway:** Framework for building real-time data processing pipelines on streaming data.
 *   **Pandas:** Used for initial data loading and preprocessing of the historical dataset.
 *   **Bokeh:** Interactive visualization library.
-*   **Panel:** High-level library to create interactive dashboards and web apps from data and Bokeh plots.
 
 
 
@@ -29,19 +28,7 @@ The pipeline leverages Pathway's ability to process data streams and maintain li
 
 ## Architecture Diagram
 
-Here's a simplified view of the data flow and architecture:
-
-```mermaid
-graph TD
-    A[Input Data (CSV)] --> B(Pathway Replay)
-    B --> C(Pathway Pipeline)
-    C --> D{Data Transformations}
-    D --> E{Windowing (Daily by Location)}
-    E --> F{Aggregation (Average Occupancy)}
-    F --> G{Price Calculation}
-    G --> H[Dynamic Price Table (Pathway)]
-    H --> I(Panel/Bokeh Visualization)
-```
+![arc](./images/arc.png )
 
 **Explanation of the Flow:**
 
@@ -53,7 +40,7 @@ graph TD
 6.  **Aggregation (Average Occupancy):** Within each daily window for each location, the average occupancy ratio (Occupancy / Capacity) is calculated.
 7.  **Price Calculation:** A dynamic price is computed based on the calculated average occupancy ratio (higher occupancy means higher price).
 8.  **Dynamic Price Table (Pathway):** Pathway maintains a live, updating table containing the latest calculated dynamic prices for each location and time window.
-9.  **Panel/Bokeh Visualization:** A web application built with Panel and Bokeh connects to the live Pathway table to display the price changes over time as they are computed.
+9.  **Bokeh Visualization:** A web application built with Panel and Bokeh connects to the live Pathway table to display the price changes over time as they are computed.
 
 ## Detailed Architecture and Workflow
 
@@ -86,48 +73,8 @@ graph TD
 5.  **Pathway Execution:**
     *   `pw.run()` starts the Pathway engine. It begins ingesting data from the simulated stream and continuously processes it through the defined pipeline, maintaining the live `daily_price` table and feeding updates to the visualization.
 
-    Okay, let's extend the previous `README.md` draft to incorporate the second dynamic pricing model you've implemented using more input features and the Pathway UDF.
 
-Here's the updated `README.md`:
 
-```markdown
-# Real-time Dynamic Parking Pricing with Pathway
-
-This project demonstrates a real-time data processing pipeline using the Pathway framework to implement a dynamic pricing strategy for parking spaces based on live data streams. The system ingests simulated streaming parking data, processes it to calculate key demand indicators for each location over time, and dynamically adjusts parking prices daily based on a more sophisticated demand-responsive model. The calculated dynamic prices are then visualized in real-time using Panel and Bokeh.
-
-## Project Overview
-
-The core idea is to react to real-time parking data streams. Building upon a simple occupancy-based model, this version incorporates additional factors like queue length, nearby traffic conditions, special events, and vehicle type to create a more nuanced dynamic pricing mechanism. As demand indicators (high occupancy, long queues, special events, certain vehicle types) increase and inhibitors (heavy nearby traffic) decrease, the price increases. Conversely, the price decreases when these conditions are reversed. This dynamic pricing aims to balance demand and availability and potentially optimize revenue while reflecting real-world conditions.
-
-The pipeline leverages Pathway's ability to process data streams, perform complex aggregations over windows, apply user-defined functions (UDFs), and maintain live, updating tables, making it suitable for real-time applications like this.
-
-## Tech Stack
-
-*   **Python:** The primary programming language.
-*   **Pathway:** Framework for building real-time data processing pipelines on streaming data.
-*   **Pandas:** Used for initial data loading and preprocessing of the historical dataset.
-*   **Bokeh:** Interactive visualization library.
-*   **Panel:** High-level library to create interactive dashboards and web apps from data and Bokeh plots.
-*   **Mermaid:** Used for generating the architecture diagram.
-
-## Architecture Diagram
-
-Here's a simplified view of the data flow and architecture for Model 2:
-
-![Alt Text](./images/image.png)
-    
-
-**Explanation of the Flow:**
-
-1.  **Input Data (CSV):** The historical parking dataset in CSV format.
-2.  **Pathway Replay:** Simulates a real-time stream by replaying the historical CSV data at a controlled rate (`input_rate`).
-3.  **Pathway Pipeline:** Pathway's core engine processes the streaming data incrementally as it arrives.
-4.  **Data Transformations:** Initial steps include parsing timestamps and calculating basic ratios (like occupancy ratio). Assumes that other relevant columns (`TrafficConditionNearby`, `QueueLength`, `IsSpecialDay`, `VehicleType`) are available and preprocessed into numeric types if necessary before ingestion into the Pathway schema.
-5.  **Windowing (Daily by Location):** The data is partitioned (`windowby`) by parking location (`LocationID`) and processed in fixed daily (`timedelta(days=1)`) "tumbling windows". This groups records occurring within the same 24-hour period for a specific location.
-6.  **Aggregation (Multiple Factors):** Within each daily window for each location, Pathway aggregates several key metrics: average occupancy ratio, average queue length, maximum nearby traffic, average vehicle weight, and the maximum value of the `IsSpecialDay` flag (which will be 1 if any record in the window indicates a special day, 0 otherwise).
-7.  **Price Calculation (via UDF):** A User-Defined Function (`compute_clamped_price`) is applied to the aggregated metrics for each window. This UDF implements a weighted formula combining all the aggregated factors to determine the dynamic price for that day and location. It also clamps the price within a predefined range.
-8.  **Dynamic Price Table (Pathway):** Pathway maintains a live, updating table (`daily_price`) containing the latest calculated dynamic prices for each location, updated each time a daily window closes.
-9.  **Panel/Bokeh Visualization:** A web application built with Panel and Bokeh connects to the live Pathway table to display the price changes over time for different locations as they are computed and updated by the pipeline.
 
 # Detailed Architecture and Workflow (Model 2)
 
@@ -172,4 +119,9 @@ This project implements a dynamic pricing strategy in Pathway, evolving from a s
 6.  **Pathway Execution:**
     *   Calling `pw.run()` starts the Pathway engine. It manages the data flow from the simulated stream, processes the data through the windowing, aggregation, and UDF steps, maintains the live price table, and continuously pushes updates to the connected Panel/Bokeh visualization.
 
-#
+# Visualization Plots
+1. BASE MODEL PLOT
+![arc](./images/model1.png )
+
+1. MODEL 2 PLOT 
+![arc](./images/model2.png )
